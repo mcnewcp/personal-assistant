@@ -8,10 +8,31 @@ current vision models transcribe the journal reliably enough for Ingestion?
 ```sh
 export ANTHROPIC_API_KEY=... OPENAI_API_KEY=... NVIDIA_API_KEY=...
 ./bakeoff.py                      # every model × every page in pages/
-./bakeoff.py --only sonnet-5      # subset
+./bakeoff.py --only sonnet-5      # subset, merged into previous results
+./bakeoff.py --fresh              # discard previous results instead
 ./report.py                       # → results/compare.html
 open results/compare.html
 ```
+
+A `--only` run **merges** into `results/raw.json` rather than replacing it —
+results are keyed by (page, model), so re-running one model updates just its
+rows and leaves the rest alone. That makes it safe to fill in a single
+provider later without re-paying for the whole sweep.
+
+## Dependencies
+
+There is no virtualenv or `requirements.txt` here on purpose. Both scripts
+use [PEP 723](https://peps.python.org/pep-0723/) inline metadata — the
+`# /// script` block at the top of each file declares its own dependencies,
+and `uv run --script` resolves them into a cached, throwaway environment
+under `~/.cache/uv`. Nothing is installed into the project or your system
+Python.
+
+The reason is scope: this repo's project layout and tooling config are still
+undecided (they belong to repo scaffolding, in the map's *Not yet specified*).
+A throwaway prototype shouldn't plant a `pyproject.toml` at the root and
+quietly pre-empt that decision. When the real application arrives it gets
+proper packaging; this stays self-contained and deletable.
 
 `pages/` and `results/` are both gitignored. Journal photos and their
 transcriptions never enter the repo — the camera roll is the archive of record

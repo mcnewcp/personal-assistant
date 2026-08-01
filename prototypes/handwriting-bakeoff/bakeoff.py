@@ -262,7 +262,28 @@ def run_one(model: Model, page: Path, b64: str, media_type: str) -> Result:
 # --------------------------------------------------------------------------
 
 
-def write_reports(results: list[Result], models: list[Model]) -> None:
+def merge_prior(results: list[Result]) -> list[Result]:
+    """Fold this run into any previous one, keyed by (page, model).
+
+    Without this, `--only gpt-luna` would rewrite raw.json with just that one
+    model and silently discard every result already collected. Re-running a
+    model replaces its old row; untouched rows survive.
+    """
+    prior = RESULTS_DIR / "raw.json"
+    if not prior.exists():
+        return results
+    fresh = {(r.page, r.model_key) for r in results}
+    kept = [
+        Result(**row)
+        for row in json.loads(prior.read_text())
+        if (row["page"], row["model_key"]) not in fresh
+    ]
+    if kept:
+        print(f"  (carrying forward {len(kept)} result(s) from a previous run)")
+    return results + kept
+
+
+def write_reports(results: list[Result]) -> None:
     raw = RESULTS_DIR / "raw"
     raw.mkdir(parents=True, exist_ok=True)
     for r in results:
@@ -320,7 +341,7 @@ def write_reports(results: list[Result], models: list[Model]) -> None:
         "| model | id | pages | failed | avg latency | avg cost/page | $/100 pages |",
         "| --- | --- | --- | --- | --- | --- | --- |",
     ]
-    for m in models:
+    for m in MODELS:
         a = agg.get(m.key)
         if not a:
             continue
@@ -347,6 +368,11 @@ def main() -> int:
     ap.add_argument("--only", help="comma-separated model keys")
     ap.add_argument("--pages", nargs="*", help="specific image paths")
     ap.add_argument("--workers", type=int, default=4)
+    ap.add_argument(
+        "--fresh",
+        action="store_true",
+        help="discard previous results instead of merging into them",
+    )
     args = ap.parse_args()
 
     models = MODELS
@@ -389,7 +415,9 @@ def main() -> int:
                 pool.map(lambda m: run_one(m, page, b64, media_type), models)
             )
 
-    write_reports(results, models)
+    if not args.fresh:
+        results = merge_prior(results)
+    write_reports(results)
     print(f"\nwrote {RESULTS_DIR}/summary.md and one file per page")
     return 0
 
