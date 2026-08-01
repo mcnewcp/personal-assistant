@@ -72,6 +72,30 @@ sharpest discriminator.
 | `moonshotai/kimi-k2.6` | 404 "Not found for account" even on a text-only call — listed in NVIDIA's catalogue but not provisioned |
 | `nvidia/nemoretriever-ocr-v1` | 410 Gone — retired, superseded by `nemotron-ocr-v2` |
 
+## Prompt versions
+
+The prompt was revised once mid-run, and the revision mattered more than the
+choice between several models. v1 results are archived in
+`results/raw.prompt-v1.json` and `results/raw.prompt-v1/`.
+
+v1 lost on two counts the writer confirmed by hand:
+
+- **Proper nouns were normalised to familiar words.** "Talestry" (a consulting
+  firm) came back as "Tapestry" from both Claude models, "Talently" from
+  `gpt-sol`, "Fidelity" from `gpt-terra`. The Claude failure was the
+  worst-*shaped*: "Tapestry" is a real word that reads as correct and would
+  survive review, where "Talesty" visibly would not.
+- **Struck-out text was reproduced.** The writer crosses a word out to correct
+  it; a correction is not part of the text.
+
+v2 adds a rule for each — never substitute a known word for an unfamiliar
+one, prefer flagging over guessing silently, and omit struck-through text
+entirely. Both Claude models then read "Talestry" correctly, and every model
+dropped the strikethrough. No OpenAI tier recovered the proper noun.
+
+**Which is the headline finding: an instruction gap looked exactly like a
+model-capability gap.**
+
 ## Caveats
 
 - Two pages, one writer, one session. This sizes the gap between tiers; it is

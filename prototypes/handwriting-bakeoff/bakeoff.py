@@ -50,8 +50,16 @@ stay Markdown headings; bulleted or numbered lists stay lists; paragraph and \
 line breaks are preserved.
 - Keep the writer's spelling, punctuation, capitalisation, abbreviations and \
 shorthand as-is, including apparent mistakes.
-- If a word is genuinely illegible write `[?]`. If you have a confident guess, \
-write the guess followed by `[?]` (e.g. `Marcus[?]`).
+- Anything the writer crossed out is a correction they already made. Leave \
+struck-through text out of the transcription entirely — do not reproduce it, \
+and do not mark it with `~~`.
+- Transcribe unfamiliar words letter by letter as they appear. Names of \
+people, employers, tools and places will often be ones you do not recognise. \
+Never substitute a similar-looking word you do know for one you do not — an \
+unfamiliar string is the expected case, not a mistake to be corrected.
+- If a word is genuinely illegible write `[?]`. If you have a guess but are \
+not confident — especially for a proper noun — write the guess followed by \
+`[?]` (e.g. `Marcus[?]`). Prefer flagging over guessing silently.
 - Output only the transcription. No preamble, no commentary, no code fence.
 """
 
