@@ -151,15 +151,26 @@ def run_anthropic(model: Model, b64: str, media_type: str) -> Result:
 
 
 def run_openai_compat(
-    model: Model, b64: str, media_type: str, base_url: str | None, api_key: str
+    model: Model,
+    b64: str,
+    media_type: str,
+    base_url: str | None,
+    api_key: str,
+    token_param: str = "max_tokens",
 ) -> Result:
+    """Chat-completions call. Serves OpenAI proper and NVIDIA's compatible API.
+
+    The output-cap parameter differs between them: GPT-5.6 rejects
+    `max_tokens` and wants `max_completion_tokens`, while the NVIDIA
+    endpoints still take `max_tokens`.
+    """
     from openai import OpenAI
 
     client = OpenAI(base_url=base_url, api_key=api_key)
     r = Result(page="", model_key=model.key, model_id=model.model_id)
     resp = client.chat.completions.create(
         model=model.model_id,
-        max_tokens=MAX_TOKENS,
+        **{token_param: MAX_TOKENS},
         messages=[
             {
                 "role": "user",
@@ -233,7 +244,7 @@ def _flatten_ocr(payload: dict) -> str:
 DISPATCH = {
     "anthropic": lambda m, b, t: run_anthropic(m, b, t),
     "openai": lambda m, b, t: run_openai_compat(
-        m, b, t, None, os.environ["OPENAI_API_KEY"]
+        m, b, t, None, os.environ["OPENAI_API_KEY"], "max_completion_tokens"
     ),
     "nvidia": lambda m, b, t: run_openai_compat(
         m, b, t, "https://integrate.api.nvidia.com/v1", os.environ["NVIDIA_API_KEY"]
