@@ -1,1 +1,13 @@
 .claude/worktrees/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Captured journal photos never belong in the repo — the camera roll is the
+# archive of record (see #6). Belt and braces: prototype scratch dirs carry
+# their own rules too.
+*.heic
+*.HEIC
